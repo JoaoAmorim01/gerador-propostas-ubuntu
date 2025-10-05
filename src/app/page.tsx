@@ -1,103 +1,68 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useSession, signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import LoadingSpinner from '@/components/LoadingSpinner'; // Importamos nossa animação
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+export default function HomePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [minimumTimeElapsed, setMinimumTimeElapsed] = useState(false);
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinimumTimeElapsed(true);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // ESTE É O GATILHO:
+  // Enquanto o status for 'loading', exibimos a animação.
+  if (status === 'loading' || !minimumTimeElapsed) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-black">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Se o status for 'authenticated', exibimos o dashboard completo.
+  if (status === 'authenticated') {
+    return (
+      <main className="flex flex-col items-center justify-center min-h-screen p-4">
+        {/* Card Principal do Dashboard */}
+        <div className="w-full max-w-lg bg-ubuntu-yellow border-4 border-black rounded-lg shadow-lg p-8 flex flex-col items-center space-y-6">
+          <h2 className="font-square text-2xl text-black text-center">
+            Bem-vindo, {session.user?.name}!
+          </h2>
+          <Link href="/proposals/new">
+            <button className="w-full max-w-xs bg-white border-2 border-black rounded-md py-2 px-4 font-square text-black text-xl hover:bg-gray-200 transition-colors">
+              CRIAR PROPOSTA
+            </button>
+          </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: '/login' })}
+            className="w-full max-w-xs bg-black border-2 border-black rounded-md py-2 px-4 font-square text-ubuntu-yellow text-xl hover:bg-gray-800 transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            SAIR
+          </button>
         </div>
+        <p className="font-sans text-ubuntu-brown text-xs mt-8">
+          SISTEMA INTERNO DA UBUNTU TECH
+        </p>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
+  }
+
+  // Se nenhum dos status acima for verdadeiro, não renderiza nada.
+  return null;
 }
